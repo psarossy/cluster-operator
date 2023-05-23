@@ -723,9 +723,11 @@ func setupContainer(instance *rabbitmqv1beta1.RabbitmqCluster) corev1.Container 
 	//Init Container resources
 	cpuRequest := k8sresource.MustParse(initContainerCPU)
 	memoryRequest := k8sresource.MustParse(initContainerMemory)
+	rabbitmqUID := int64(999)
 	command := []string{
 		"sh", "-c",
-		"cp /tmp/erlang-cookie-secret/.erlang.cookie /var/lib/rabbitmq/.erlang.cookie " +
+		"chown -R " + strconv.Itoa(int(rabbitmqUID)) + " /var/lib/rabbitmq/ ; " +
+		    "cp /tmp/erlang-cookie-secret/.erlang.cookie /var/lib/rabbitmq/.erlang.cookie " +
 			"&& chmod 600 /var/lib/rabbitmq/.erlang.cookie ; " +
 			"cp /tmp/rabbitmq-plugins/enabled_plugins /operator/enabled_plugins ; " +
 			"echo '[default]' > /var/lib/rabbitmq/.rabbitmqadmin.conf " +

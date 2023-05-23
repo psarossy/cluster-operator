@@ -1360,12 +1360,16 @@ default_pass = {{ .Data.data.password }}
 
 			initContainers := statefulSet.Spec.Template.Spec.InitContainers
 			Expect(initContainers).To(HaveLen(1))
-
+			
+			rabbitmqUID := int64(999)
+			
 			initContainer := extractContainer(initContainers, "setup-container")
 			Expect(initContainer).To(MatchFields(IgnoreExtras, Fields{
 				"Image": Equal("rabbitmq-image-from-cr"),
 				"Command": ConsistOf(
-					"sh", "-c", "cp /tmp/erlang-cookie-secret/.erlang.cookie /var/lib/rabbitmq/.erlang.cookie "+
+					"sh", "-c",
+					"chown -R " + strconv.Itoa(int(rabbitmqUID)) + " /var/lib/rabbitmq/ ; " +
+					    "cp /tmp/erlang-cookie-secret/.erlang.cookie /var/lib/rabbitmq/.erlang.cookie "+
 						"&& chmod 600 /var/lib/rabbitmq/.erlang.cookie ; "+
 						"cp /tmp/rabbitmq-plugins/enabled_plugins /operator/enabled_plugins ; "+
 						"echo '[default]' > /var/lib/rabbitmq/.rabbitmqadmin.conf "+
